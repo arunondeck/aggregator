@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Listings Home</title>
+</head>
+<body>
+  <h1>Latest Listings</h1>
+
+  <form method="get" action="/">
+    <label>State</label>
+    <select name="state" onchange="this.form.submit()">
+      <option value="">All states</option>
+      {% for s in states %}<option value="{{s}}" {% if s == state %}selected{% endif %}>{{s}}</option>{% endfor %}
+    </select>
+
+    <label>District</label>
+    <select name="district" onchange="this.form.submit()">
+      {% if state %}<option value="">View all from state</option>{% else %}<option value="">All districts</option>{% endif %}
+      {% for d in districts %}<option value="{{d}}" {% if d == district %}selected{% endif %}>{{d}}</option>{% endfor %}
+    </select>
+
+    <label>Locality</label>
+    <select name="city" onchange="this.form.submit()">
+      {% if district %}<option value="">View all from district</option>{% else %}<option value="">All localities</option>{% endif %}
+      {% for c in cities %}<option value="{{c}}" {% if c == city %}selected{% endif %}>{{c}}</option>{% endfor %}
+    </select>
+
+    <label>Sort</label>
+    <select name="sort_by">
+      <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date (newest)</option>
+      <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date (oldest)</option>
+      <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price (low-high)</option>
+      <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price (high-low)</option>
+    </select>
+
+    <label>Min price</label><input name="min_price" value="{{ min_price or '' }}" />
+    <label>Max price</label><input name="max_price" value="{{ max_price or '' }}" />
+
+    <button type="submit">Filter by</button>
+  </form>
+
+  <h2>Popular geolocations</h2>
+  <ul>
+    {% for loc, count in popular_locations %}
+      <li><a href="/?city={{ loc }}">View all in {{ loc }}</a> ({{ count }})</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Popular brands</h2>
+  <ul>
+    {% for brand, count in popular_brands %}
+      <li><a href="/api/listings?brand={{ brand }}">{{ brand }}</a> ({{ count }})</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Quick filters</h2>
+  <ul>
+    <li><a href="/?max_price=2000{% if state %}&state={{state}}{% endif %}{% if district %}&district={{district}}{% endif %}{% if city %}&city={{city}}{% endif %}">View all under 2000</a></li>
+  </ul>
+
+  <h2>Available filters</h2>
+  <ul>
+    {% for f in filter_defs %}
+      <li>{{ f.label }}: {{ filter_values.get(f.key, [])|join(', ') }}</li>
+    {% endfor %}
+  </ul>
+
+  {% for l in listings %}
+    <article style="border:1px solid #ccc;margin:8px;padding:8px;">
+      <h3>{{ l.title }}</h3>
+      <p>{{ l.product_family.slug }} | {{ l.location.state }} / {{ l.location.district }} / {{ l.location.city }}</p>
+      <p>Price: {{ l.price }}</p>
+      <p>Source: <a href="{{ l.source_url }}">{{ l.source_name }}</a></p>
+      <ul>
+        {% for av in l.attributes %}
+          <li>{{ av.attribute.label }}: {{ av.value }}</li>
+        {% endfor %}
+      </ul>
+    </article>
+  {% endfor %}
+</body>
+</html>
