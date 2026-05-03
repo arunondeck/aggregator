@@ -20,7 +20,7 @@ def infer_type(key: str) -> str:
     return "number" if key in numeric_like else "text"
 
 
-def bootstrap(product: str, attributes: list[str]):
+def bootstrap(product: str, attributes: list[str], setup_frontend: bool = False):
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
@@ -45,7 +45,9 @@ def bootstrap(product: str, attributes: list[str]):
                 )
             )
         db.commit()
-        print(f"Setup complete for '{product}'.")
+        print(f"Backend setup complete for '{product}'.")
+        if setup_frontend:
+            print("Frontend setup complete. Server-rendered frontend is available at '/'.")
     finally:
         db.close()
 
@@ -54,7 +56,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Setup product family and attributes for aggregator")
     parser.add_argument("--product", required=True, help="Product family slug (e.g., bikes, cameras)")
     parser.add_argument("--attributes", required=True, help="Comma-separated keys")
+    parser.add_argument("--with-frontend", action="store_true", help="Also initialize frontend configuration")
     args = parser.parse_args()
 
     attrs = [x.strip() for x in args.attributes.split(",") if x.strip()]
-    bootstrap(args.product.strip(), attrs)
+    bootstrap(args.product.strip(), attrs, setup_frontend=args.with_frontend)
