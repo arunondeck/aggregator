@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Admin</title></head>
+<body>
+  <h1>Aggregator Admin</h1>
+
+  <h2>Product Families</h2>
+  <ul>
+    {% for f in families %}
+      <li>{{ f.name }} ({{ f.slug }})</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Attribute Definitions</h2>
+  <ul>
+    {% for a in attrs %}
+      <li>{{ a.product_family.slug }} :: {{ a.key }} ({{ a.data_type }})</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Listings</h2>
+  {% for l in listings %}
+    <div style="border:1px solid #999;margin:8px;padding:8px;">
+      <h3>{{ l.title }} - {{ l.product_family.slug }}</h3>
+      <p>{{ l.location.state }} / {{ l.location.district }} / {{ l.location.city }}</p>
+      <p>Price: {{ l.price }}</p>
+      <p>Source: <a href="{{ l.source_url }}">{{ l.source_name }}</a></p>
+      <ul>
+        {% for av in l.attributes %}
+          {% if av.value %}
+            <li>{{ av.attribute.label }}: {{ av.value }}</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</body>
+</html>
